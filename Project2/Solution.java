@@ -85,7 +85,7 @@ public class Solution {
         
         // Function to get score for a specific state
         class ScoreCalculator {
-            int getScore(int spaceIndex, int prevValue) {
+            int getScore(int spaceIndex, int prevValue, boolean[] visited) { //------------- new ---------------
                 // If we've already computed this state, return it
                 if (dp[spaceIndex].containsKey(prevValue)) {
                     System.out.println("Memoized Space[" + spaceIndex + "] score [" + dp[spaceIndex].get(prevValue) + "]");
@@ -100,18 +100,24 @@ public class Solution {
                     dp[spaceIndex].put(space.value, space.points);
                     // return space.points;
                 }
-                
+
                 System.out.println("Space[" + spaceIndex + "] value [" + space.value + "] points [" + space.points + "]");
-                
+
+                // Mark current space as visited
+                visited[spaceIndex] = true; //------------- new ---------------
+
                 // Try all possible paths through neighbors
                 int maxScore = space.points;  // Start with just this space's points
                 for (int neighbor : space.neighbors) {
-                    System.out.println("Getting Score for neighbor [" + neighbor + "]");
-                    int neighborScore = getScore(neighbor, space.value);
-                    System.out.println("Neighbor[" + neighbor + "] score [" + neighborScore + "]");
-                    maxScore = Math.max(maxScore, space.points + neighborScore);
+                    if(!visited[neighbor]) { //------------- new ---------------
+                        System.out.println("Getting Score for neighbor [" + neighbor + "]");
+                        boolean[] newVisited = Arrays.copyOf(visited, visited.length); //------------- new ---------------
+                        int neighborScore = getScore(neighbor, space.value, newVisited); //------------- new ---------------
+                        System.out.println("Neighbor[" + neighbor + "] score [" + neighborScore + "]");
+                        maxScore = Math.max(maxScore, space.points + neighborScore);
+                    }
                 }
-                
+
                 System.out.println("Space[" + spaceIndex + "] score [" + maxScore + "]");
                 dp[spaceIndex].put(prevValue, maxScore);
                 return maxScore;
@@ -122,9 +128,10 @@ public class Solution {
         ScoreCalculator calculator = new ScoreCalculator();
         int maxScore = 0;
         for (int i = 0; i < n; i++) {
-            maxScore = Math.max(maxScore, calculator.getScore(i, -1));
+            boolean[] visited = new boolean[n]; //------------- new ---------------
+            maxScore = Math.max(maxScore, calculator.getScore(i, -1, visited)); //------------- new ---------------
         }
-        
+
         return maxScore;
     }
 
